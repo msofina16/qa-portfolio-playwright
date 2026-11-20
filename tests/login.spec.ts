@@ -50,4 +50,22 @@ test.describe('Авторизация', () => {
     );
     await expect(page).not.toHaveURL(/inventory\.html/);
   });
+
+  test('TC-10: выход из аккаунта', async ({ page }) => {
+    // Предусловие: выполнен вход под standard_user
+    await page.getByTestId('username').fill('standard_user');
+    await page.getByTestId('password').fill(PASSWORD);
+    await page.getByTestId('login-button').click();
+    await expect(page).toHaveURL(/inventory\.html/);
+
+    // Шаги 1-2: меню -> Logout -> страница входа
+    await page.getByRole('button', { name: 'Open Menu' }).click();
+    await page.getByTestId('logout-sidebar-link').click();
+    await expect(page.getByTestId('login-button')).toBeVisible();
+
+    // Шаг 3: кнопка «Назад» -> каталог не открывается
+    await page.goBack();
+    await expect(page.getByTestId('login-button')).toBeVisible();
+    await expect(page.getByTestId('inventory-list')).toBeHidden();
+  });
 });

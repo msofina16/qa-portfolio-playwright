@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-// Тест-кейсы TC-08, TC-09 из qa-portfolio
+// Тест-кейсы TC-08, TC-09 из qa-portfolio, TC-11 — дополнительный негативный тест
 
 test.describe('Оформление заказа', () => {
   // Предусловие: выполнен вход под standard_user, в корзине 1 товар, открыта корзина
@@ -49,6 +49,19 @@ test.describe('Оформление заказа', () => {
     // Шаг 2: Continue -> ошибка, остаёмся на форме
     await page.getByTestId('continue').click();
     await expect(page.getByTestId('error')).toHaveText('Error: First Name is required');
+    await expect(page.getByTestId('title')).toHaveText('Checkout: Your Information');
+  });
+
+  test('TC-11: оформление заказа без фамилии', async ({ page }) => {
+    await page.getByTestId('checkout').click();
+
+    // Шаг 1: Last Name пустое, остальное заполнено
+    await page.getByTestId('firstName').fill('Maria');
+    await page.getByTestId('postalCode').fill('0100');
+
+    // Шаг 2: Continue -> ошибка, остаёмся на форме
+    await page.getByTestId('continue').click();
+    await expect(page.getByTestId('error')).toHaveText('Error: Last Name is required');
     await expect(page.getByTestId('title')).toHaveText('Checkout: Your Information');
   });
 });

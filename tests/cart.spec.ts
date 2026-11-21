@@ -1,14 +1,14 @@
 import { test, expect } from '@playwright/test';
+import { LoginPage } from '../pages/LoginPage';
 
 // Тест-кейсы TC-06, TC-07 из qa-portfolio
 
 test.describe('Корзина', () => {
   // Предусловие: выполнен вход под standard_user, корзина пустая
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('username').fill('standard_user');
-    await page.getByTestId('password').fill('secret_sauce');
-    await page.getByTestId('login-button').click();
+    const loginPage = new LoginPage(page);
+    await loginPage.open();
+    await loginPage.login('standard_user', 'secret_sauce');
     await expect(page).toHaveURL(/inventory\.html/);
   });
 

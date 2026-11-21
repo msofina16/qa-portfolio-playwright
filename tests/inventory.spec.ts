@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage';
+import { InventoryPage } from '../pages/InventoryPage';
 
 // Тест-кейс TC-05 из qa-portfolio
 
@@ -13,11 +14,11 @@ test.describe('Каталог', () => {
   });
 
   test('TC-05: сортировка по цене (от меньшей к большей)', async ({ page }) => {
-    await page.getByTestId('product-sort-container').selectOption('lohi');
+    const inventoryPage = new InventoryPage(page);
+    await inventoryPage.sortBy('lohi');
 
     // Собираем все цены со страницы: "$7.99" -> 7.99
-    const priceTexts = await page.getByTestId('inventory-item-price').allTextContents();
-    const prices = priceTexts.map((text) => Number(text.replace('$', '')));
+    const prices = await inventoryPage.getPrices();
 
     // Ожидаем, что цены идут по возрастанию
     const sorted = [...prices].sort((a, b) => a - b);

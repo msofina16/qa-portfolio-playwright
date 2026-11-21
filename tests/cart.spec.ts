@@ -1,49 +1,52 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage';
+import { InventoryPage } from '../pages/InventoryPage';
+import { CartPage } from '../pages/CartPage';
 
 // Тест-кейсы TC-06, TC-07 из qa-portfolio
 
 test.describe('Корзина', () => {
+  let inventoryPage: InventoryPage;
+  let cartPage: CartPage;
+
   // Предусловие: выполнен вход под standard_user, корзина пустая
   test.beforeEach(async ({ page }) => {
     const loginPage = new LoginPage(page);
+    inventoryPage = new InventoryPage(page);
+    cartPage = new CartPage(page);
+
     await loginPage.open();
     await loginPage.login('standard_user', 'secret_sauce');
     await expect(page).toHaveURL(/inventory\.html/);
   });
 
-  test('TC-06: добавление товара в корзину', async ({ page }) => {
+  test('TC-06: добавление товара в корзину', async () => {
     // Запоминаем цену рюкзака в каталоге
-    const backpack = page.getByTestId('inventory-item').filter({ hasText: 'Sauce Labs Backpack' });
-    const catalogPrice = await backpack.getByTestId('inventory-item-price').textContent();
+    const catalogPrice = await inventoryPage.getPriceOf('Sauce Labs Backpack');
 
     // Шаг 1: Add to cart -> кнопка стала Remove, на корзине цифра 1
-    await page.getByTestId('add-to-cart-sauce-labs-backpack').click();
-    await expect(page.getByTestId('remove-sauce-labs-backpack')).toBeVisible();
-    await expect(page.getByTestId('shopping-cart-badge')).toHaveText('1');
+    await inventoryPage.addToCart('sauce-labs-backpack');
+    await expect(inventoryPage.removeButton('sauce-labs-backpack')).toBeVisible();
+    await expect(inventoryPage.cartBadge).toHaveText('1');
 
     // Шаг 2: в корзине рюкзак, количество 1, цена как в каталоге
-    // Ищем элементы только внутри списка корзины (cart-list): так тест не перепутает
-    // корзину с каталогом, пока страница ещё перерисовывается
-    await page.getByTestId('shopping-cart-link').click();
-    const cart = page.getByTestId('cart-list');
-    await expect(cart.getByTestId('inventory-item-name')).toHaveText('Sauce Labs Backpack');
-    await expect(cart.getByTestId('item-quantity')).toHaveText('1');
-    await expect(cart.getByTestId('inventory-item-price')).toHaveText(catalogPrice!);
+    await inventoryPage.openCart();
+    await expect(cartPage.itemName).toHaveText('Sauce Labs Backpack');
+    await expect(cartPage.itemQuantity).toHaveText('1');
+    await expect(cartPage.itemPrice).toHaveText(catalogPrice!);
   });
 
-  test('TC-07: удаление товара из корзины', async ({ page }) => {
+  test('TC-07: удаление товара из корзины', async () => {
     // Предусловие: в корзине 1 товар
-    await page.getByTestId('add-to-cart-sauce-labs-backpack').click();
+    await inventoryPage.addToCart('sauce-labs-backpack');
 
     // Шаг 1: открыть корзину -> 1 товар
-    await page.getByTestId('shopping-cart-link').click();
-    const cart = page.getByTestId('cart-list');
-    await expect(cart.getByTestId('inventory-item')).toHaveCount(1);
+    await inventoryPage.openCart();
+    await expect(cartPage.items).toHaveCount(1);
 
     // Шаг 2: Remove -> товара нет, цифры на значке нет
-    await cart.getByTestId('remove-sauce-labs-backpack').click();
-    await expect(cart.getByTestId('inventory-item')).toHaveCount(0);
-    await expect(page.getByTestId('shopping-cart-badge')).toBeHidden();
+    await cartPage.remove('sauce-labs-backpack');
+    await expect(cartPage.items).toHaveCount(0);
+    await expect(inventoryPage.cartBadge).toBeHidden();
   });
 });

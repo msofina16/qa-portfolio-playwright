@@ -37,20 +37,31 @@ export default defineConfig({
   },
 
   /* Configure projects for major browsers */
+  /* UI-тесты (Sauce Demo) запускаются в трёх браузерах, папку tests/api пропускают */
   projects: [
     {
       name: 'chromium',
+      testIgnore: 'api/**',
       use: { ...devices['Desktop Chrome'] },
     },
 
     {
       name: 'firefox',
+      testIgnore: 'api/**',
       use: { ...devices['Desktop Firefox'] },
     },
 
     {
       name: 'webkit',
+      testIgnore: 'api/**',
       use: { ...devices['Desktop Safari'] },
+    },
+
+    /* API-тесты (Restful Booker): браузер не нужен, запускаются один раз */
+    {
+      name: 'api',
+      testMatch: 'api/**',
+      use: { baseURL: 'https://restful-booker.herokuapp.com' },
     },
 
     /* Test against mobile viewports. */

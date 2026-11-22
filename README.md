@@ -7,7 +7,7 @@
 | Объект | Тип | Статус |
 |---|---|---|
 | [saucedemo.com](https://www.saucedemo.com) — интернет-магазин | UI / E2E | в работе |
-| [Restful Booker](https://restful-booker.herokuapp.com) — API бронирования | API | в планах |
+| [Restful Booker](https://restful-booker.herokuapp.com) — API бронирования | API | в работе |
 
 ## Стек
 

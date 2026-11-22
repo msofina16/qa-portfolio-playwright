@@ -26,4 +26,30 @@ test.describe('API: бронирования', () => {
     // Проверка: код ответа 404 — «не найдено»
     expect(response.status()).toBe(404);
   });
+
+  test('API-03: создание бронирования', async ({ request }) => {
+    // Данные нового бронирования — «заполненный бланк»
+    const newBooking = {
+      firstname: 'Maria',
+      lastname: 'Test',
+      totalprice: 100,
+      depositpaid: true,
+      bookingdates: { checkin: '2026-12-01', checkout: '2026-12-05' },
+      additionalneeds: 'Breakfast',
+    };
+
+    // Шаг 1: POST /booking — отправляем бланк в теле запроса (data)
+    const createResponse = await request.post('/booking', { data: newBooking });
+    expect(createResponse.status()).toBe(200);
+
+    // Сервер выдал номер и вернул то, что мы отправили
+    const created = await createResponse.json();
+    expect(typeof created.bookingid).toBe('number');
+    expect(created.booking).toEqual(newBooking);
+
+    // Шаг 2: GET /booking/{номер} — бронирование действительно сохранилось
+    const getResponse = await request.get('/booking/' + created.bookingid);
+    expect(getResponse.status()).toBe(200);
+    expect(await getResponse.json()).toEqual(newBooking);
+  });
 });
